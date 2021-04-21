@@ -13,6 +13,7 @@ router.param('username', function(req, res, next, username) {
     }).catch(next);
 });
 
+// Retrieves user profile
 router.get('/:username', auth.optional, function(req, res, next) {
     if (req.payload) {
         User.findById(req.payload.id).then(function(user) {
