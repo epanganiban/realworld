@@ -38,8 +38,10 @@ if (isProduction) {
     mongoose.set('debug', true);
 }
 
+// Gives app access to models
 require('./models/User');
 require('./models/Article');
+require('./models/Comment');
 
 require('./config/passport');
 
