@@ -23,6 +23,7 @@ var UserSchema = new mongoose.Schema({
     },
     bio: String,
     image: String,
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
     hash: String,
     salt: String
 }, { timestamps: true });
@@ -66,7 +67,7 @@ UserSchema.methods.toAuthJSON = function() {
     };
 };
 
-
+// Gets JSON representation of user profile
 UserSchema.methods.toProfileJSONFor = function(user) {
     return {
         username: this.username,
@@ -74,6 +75,30 @@ UserSchema.methods.toProfileJSONFor = function(user) {
         image: this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
         following: false
     };
+};
+
+// Method for user to favorite an article
+UserSchema.methods.favorite = function(id) {
+    if (this.favorites.indexOf(id) === -1) {
+        this.favorites.push(id);
+    }
+
+    return this.save();
+};
+
+// Method to remove article from user favorites
+UserSchema.methods.unfavorite = function(id) {
+    this.favorites.remove(id);
+    return this.save();
+};
+
+// Method to check if user has favorited an article
+UserSchema.methods.isFavorite = function(id) {
+    return this.favorites.some(function(favoriteId) {
+        if (favoriteId === null) { return false; }
+
+        return favoriteId.toString() === id.toString();
+    });
 };
 
 mongoose.model('User', UserSchema);
