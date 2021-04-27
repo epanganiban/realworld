@@ -1,3 +1,4 @@
+import ArticlePreview from './ArticlePreview';
 import React from 'react';
 
 const ArticleList = props => {
@@ -20,7 +21,7 @@ const ArticleList = props => {
             {
                 props.articles.map(article => {
                     return (
-                        <h2>{ article.title }</h2>
+                        <ArticlePreview article={ article } key={ article.slug }/>
                     );
                 })
             }
