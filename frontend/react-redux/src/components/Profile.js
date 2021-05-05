@@ -1,3 +1,5 @@
+'use strict';
+
 import ArticleList from './ArticleList';
 import React from 'react';
 import { Link } from 'react-router';
@@ -5,48 +7,48 @@ import agent from '../agent';
 import { connect } from 'react-redux';
 
 const EditProfileSettings = props => {
-    if (props.isUser) {
-      return (
-        <Link
-          to="settings"
-          className="btn btn-sm btn-outline-secondary action-btn">
-          <i className="ion-gear-a"></i> Edit Profile Settings
-        </Link>
-      );
-    }
-    return null;
-};
-  
-const FollowUserButton = props => {
-    if (props.isUser) {
-      return null;
-    }
-  
-    let classes = 'btn btn-sm action-btn';
-    if (props.user.following) {
-      classes += ' btn-secondary';
-    } else {
-      classes += ' btn-outline-secondary';
-    }
-  
-    const handleClick = ev => {
-      ev.preventDefault();
-      if (props.user.following) {
-        props.unfollow(props.user.username)
-      } else {
-        props.follow(props.user.username)
-      }
-    };
-  
+  if (props.isUser) {
     return (
-      <button
-        className={classes}
-        onClick={handleClick}>
-        <i className="ion-plus-round"></i>
-        &nbsp;
-        {props.user.following ? 'Unfollow' : 'Follow'} {props.user.username}
-      </button>
+      <Link
+        to="settings"
+        className="btn btn-sm btn-outline-secondary action-btn">
+        <i className="ion-gear-a"></i> Edit Profile Settings
+      </Link>
     );
+  }
+  return null;
+};
+
+const FollowUserButton = props => {
+  if (props.isUser) {
+    return null;
+  }
+
+  let classes = 'btn btn-sm action-btn';
+  if (props.user.following) {
+    classes += ' btn-secondary';
+  } else {
+    classes += ' btn-outline-secondary';
+  }
+
+  const handleClick = ev => {
+    ev.preventDefault();
+    if (props.user.following) {
+      props.unfollow(props.user.username)
+    } else {
+      props.follow(props.user.username)
+    }
+  };
+
+  return (
+    <button
+      className={classes}
+      onClick={handleClick}>
+      <i className="ion-plus-round"></i>
+      &nbsp;
+      {props.user.following ? 'Unfollow' : 'Follow'} {props.user.username}
+    </button>
+  );
 };
 
 const mapStateToProps = state => ({
@@ -61,13 +63,13 @@ const mapDispatchToProps = dispatch => ({
     payload: agent.Profile.follow(username)
   }),
   onLoad: payload => dispatch({ type: 'PROFILE_PAGE_LOADED', payload }),
+  onSetPage: (page, payload) => dispatch({ type: 'SET_PAGE', page, payload }),
   onUnfollow: username => dispatch({
     type: 'UNFOLLOW_USER',
     payload: agent.Profile.unfollow(username)
   }),
   onUnload: () => dispatch({ type: 'PROFILE_PAGE_UNLOADED' })
 });
-
 
 class Profile extends React.Component {
   componentWillMount() {
@@ -103,6 +105,11 @@ class Profile extends React.Component {
     );
   }
 
+  onSetPage(page) {
+    const promise = agent.Articles.byAuthor(this.props.profile.username, page);
+    this.props.onSetPage(page, promise);
+  }
+
   render() {
     const profile = this.props.profile;
     if (!profile) {
@@ -111,6 +118,8 @@ class Profile extends React.Component {
 
     const isUser = this.props.currentUser &&
       this.props.profile.username === this.props.currentUser.username;
+
+    const onSetPage = page => this.onSetPage(page)
 
     return (
       <div className="profile-page">
@@ -147,7 +156,10 @@ class Profile extends React.Component {
               </div>
 
               <ArticleList
-                articles={this.props.articles} />
+                articles={this.props.articles}
+                articlesCount={this.props.articlesCount}
+                currentPage={this.props.currentPage}
+                onSetPage={onSetPage} />
             </div>
 
           </div>
